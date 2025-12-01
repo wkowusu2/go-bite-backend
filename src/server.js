@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import health from './routes/health.js';
-import {supabaseAdmin} from './config/supabase.js'
+import {supabaseAdmin} from './config/supabaseAdmin.js'
 
 const port = process.env.PORT || 3000
 
