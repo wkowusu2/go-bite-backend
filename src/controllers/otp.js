@@ -1,12 +1,17 @@
-import { deleteOtp, getOtp, saveOtp } from "../../utils/supabaseHelpers"
+import { config } from "dotenv";
+import { deleteOtp, getOtp, getUserByPhone, saveOtp } from "../../utils/supabaseHelpers.js"
 import { randomInt } from 'crypto';
-import * as axios from 'axios'
-import { supabaseAdmin } from "../config/supabaseAdmin";
+import axios from 'axios'
+import { supabaseAdmin } from "../config/supabaseAdmin.js"
+import { supabaseClient } from "../config/supabaseClient.js";
 
-export const sendOtp = async (phone) => {
+config()
+export const sendOtp = async (req, res) => {
+    const {phone} = req.body
     try {
         //generate the otp
     let otp = '';
+    let length = 6;
     for (let i = 0; i < length; i++) {
         otp += randomInt(0, 10); 
     }
@@ -15,65 +20,74 @@ export const sendOtp = async (phone) => {
     if(!success) throw new Error(message)
     //send otp to phone number via hubtel
 
-    await axios.post("https://api.hubtel.com/v1/messages/send", {
-    from: "GoBite",
-    to: phone,
-    content: `Your login code is ${otp}`
-  }, {
-    headers: {
-      "Authorization": `Basic ${process.env.HUBTEL_API_KEY}`
-    }
-  });
+    const clientId = process.env.HUBTEL_CLIENT_ID;
+    const clientSecret = process.env.HUBTEL_CLIENT_SECRET;
 
-  //return the message
-  return { message: "OTP sent" };
-}catch (error) {
-        return {success: false, message: error.message}
+    const url = `https://smsc.hubtel.com/v1/messages/send?clientid=${clientId}&clientsecret=${clientSecret}&from=GoBite&to=${phone}&content=Your+otp+from+GoBite+is+${otp}`;
+
+    const resp = await axios.get(url);
+    console.log("response from hubtel",resp)
+
+    if(res.data.messageId) {
+        const response = { message: "OTP sent", data: `${otp}` };
+        res.status(200).json(response)
+    }
+    else{
+        throw new Error("Failed to send OTP, please try again")
+    }
+    }catch (error) {
+        const response = {success: false, message: error.message}
+        return res.status(400).json(response)
     }
 } 
 
-export const verifyOtp = async (phone, otp) => {
-    try {
-        //get otp from db
-        const {data,message,success} = await getOtp(phone)
-        if(!success) throw new Error(message)
 
-        //delete otp from db 
-        const {success_delete,message_delete} = await deleteOtp(phone)
+export const verifyOtp = async (req, res) => {
+  const { phone, otp } = req.body;
 
-        if(!success_delete) throw new Error(message)
-        
-            // Check if user exists
-        const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers({
-            phone: phone
-        });
+  try {
+    // Get OTP from DB
+    const { data: otpData, message, success } = await getOtp(phone);
+    if (!success) throw new Error(message);
 
-        let userId = null;
+    if (!otpData[0]?.otp || otpData[0].otp !== Number(otp)) {
+      throw new Error('Invalid or expired OTP');
+    }
 
-        if (existingUser?.users?.length > 0) {
-            userId = existingUser.users[0].id;
-        }else {
-        // Create new user with phone_confirmed = true
-         const { data, error } = await supabaseAdmin.auth.admin.createUser({
-        phone: phone,
-        phone_confirm: true
-        });
-        if (error) throw new Error(error.message);
-        userId = data.user.id;
-        } 
-        // Create a Supabase session for the user
-        const { data: sessionData, error: sessionError } =
-            await supabaseAdmin.auth.admin.generateToken(userId);
+    // Delete OTP
+    const { success_delete, message_delete } = await deleteOtp(phone);
+    if (!success_delete) throw new Error(message_delete);
 
-        if (sessionError) return { error: sessionError };
+    // Check if a user with this phone already exists
+    const existingUser = await getUserByPhone(phone); // looks in user_metadata.phone
+    let sessionUser;
 
-        return {
-            access_token: sessionData.access_token,
-            refresh_token: sessionData.refresh_token,
-            user: sessionData.user
-        };
+    // Create or sign in anonymously
+    const { data: anonData, error: anonError } = await supabaseClient.auth.signInAnonymously();
+    if (anonError) throw new Error(anonError.message);
 
-    } catch(error) {
-                return {success: false, message: error.message}
-        }
-} 
+    sessionUser = anonData;
+
+    //  Merge/update user_metadata with phone
+    const updatedMetadata = existingUser
+      ? { ...existingUser.user_metadata, phone }
+      : { phone };
+
+    const { data: updatedUser, error: updateError } =
+      await supabaseAdmin.auth.admin.updateUserById(sessionUser.user.id, {
+        user_metadata: updatedMetadata,
+      });
+
+    if (updateError) throw new Error(updateError.message);
+
+    // Return session info
+    return res.status(200).json({
+      access_token: sessionUser.session.access_token,
+      refresh_token: sessionUser.session.refresh_token,
+      user: updatedUser,
+    });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
