@@ -26,9 +26,9 @@ export const sendOtp = async (req, res) => {
     const url = `https://smsc.hubtel.com/v1/messages/send?clientid=${clientId}&clientsecret=${clientSecret}&from=GoBite&to=${phone}&content=Your+otp+from+GoBite+is+${otp}`;
 
     const resp = await axios.get(url);
-    console.log("response from hubtel",resp)
+    const response = await resp.data
 
-    if(res.data.messageId) {
+    if(response?.messageId) {
         const response = { message: "OTP sent", data: `${otp}` };
         res.status(200).json(response)
     }
