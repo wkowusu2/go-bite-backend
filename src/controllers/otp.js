@@ -29,7 +29,7 @@ export const sendOtp = async (req, res) => {
     const response = await resp.data
 
     if(response?.messageId) {
-        const response = { message: "OTP sent", data: `${otp}` };
+        const response = { message: "OTP sent" };
         res.status(200).json(response)
     }
     else{
