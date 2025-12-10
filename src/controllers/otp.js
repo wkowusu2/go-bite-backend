@@ -26,6 +26,7 @@ export const sendOtp = async (req, res) => {
     const url = `https://smsc.hubtel.com/v1/messages/send?clientid=${clientId}&clientsecret=${clientSecret}&from=GoBite&to=${phone}&content=Your+otp+from+GoBite+is+${otp}`;
 
     const resp = await axios.get(url);
+    console.log(resp)
     const response = await resp.data
 
     if(response?.messageId) {
@@ -67,6 +68,7 @@ export const verifyOtp = async (req, res) => {
     if (anonError) throw new Error(anonError.message);
 
     sessionUser = anonData;
+    console.log('session user: ', anonData)
 
     //  Merge/update user_metadata with phone
     const updatedMetadata = existingUser
