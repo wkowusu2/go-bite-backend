@@ -1,0 +1,1 @@
+ALTER TABLE "otp_table" DROP CONSTRAINT "otp_table_phone_number_unique";

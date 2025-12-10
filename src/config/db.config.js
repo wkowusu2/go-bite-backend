@@ -9,12 +9,11 @@ const pool = new Pool({
     max: 10,
     min: 2,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis:15000,
+    connectionTimeoutMillis:20000,
     keepAlive: true,
 })
 
 export const dbConnect = async () => {
-    console.log("DB URL:", process.env.DATABASE_URL);
     const client = await pool.connect();
   try {
     await client.query("SELECT 1") ;       
@@ -30,4 +29,7 @@ export async function closeDb() {
   console.log("Pool closed.")
 }
 
-export const db = drizzle(pool);
+export function getDb(){
+    const db = drizzle(pool);
+    return db;
+}

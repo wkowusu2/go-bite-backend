@@ -1,9 +1,8 @@
 import { config } from "dotenv";
-import { deleteOtp, getOtp, getUserByPhone, saveOtp } from "../../utils/supabaseHelpers.js"
 import { randomInt } from 'crypto';
 import axios from 'axios'
-import { supabaseAdmin } from "../config/supabaseAdmin.js"
-import { supabaseClient } from "../config/supabaseClient.js";
+import { createUser, deleteOtp, getOtp, getUserByPhone, saveOtp } from "../service/dbService.js";
+import { generateTokens } from "../service/jwtService.js";
 
 config()
 export const sendOtp = async (req, res) => {
@@ -16,8 +15,8 @@ export const sendOtp = async (req, res) => {
         otp += randomInt(0, 10); 
     }
     //save otp to db 
-    const {success, message} = await saveOtp(phone, otp)
-    if(!success) throw new Error(message)
+    const {success, error} = await saveOtp(phone, otp)
+    if(!success) throw new Error(error)
     //send otp to phone number via hubtel
 
     const clientId = process.env.HUBTEL_CLIENT_ID;
@@ -44,52 +43,56 @@ export const sendOtp = async (req, res) => {
 
 
 export const verifyOtp = async (req, res) => {
+  const response = {success: true, access: '', refresh: '', userDetails: {}};
   const { phone, otp } = req.body;
 
   try {
     // Get OTP from DB
-    const { data: otpData, message, success } = await getOtp(phone);
-    if (!success) throw new Error(message);
+    const { success, error, savedOtp } = await getOtp(phone);
+    if (!success) throw new Error(error);
 
-    if (!otpData[0]?.otp || otpData[0].otp !== Number(otp)) {
-      throw new Error('Invalid or expired OTP');
+    if (savedOtp) {
+      // throw new Error('Invalid or expired OTP');
+      console.log("saved otp: ", savedOtp)
     }
 
     // Delete OTP
-    const { success_delete, message_delete } = await deleteOtp(phone);
-    if (!success_delete) throw new Error(message_delete);
+    const { success_delete, error_delete } = await deleteOtp(phone);
+    if (!success_delete) throw new Error(error_delete);
 
     // Check if a user with this phone already exists
-    const existingUser = await getUserByPhone(phone); // looks in user_metadata.phone
-    let sessionUser;
+    const {_success, user, _error} = await getUserByPhone(phone);
+    if(!_success) throw new Error(_error)
 
-    // Create or sign in anonymously
-    const { data: anonData, error: anonError } = await supabaseClient.auth.signInAnonymously();
-    if (anonError) throw new Error(anonError.message);
+    if(!user){
+      console.log("no user found")
+      const {error, success,userDetails} = await createUser(phone)
+      if(!success) throw new Error(error)
+      //create session data 
+      const {_error, _data, _success} = await generateTokens(userDetails.id, userDetails.phone)
+      if(!_success) throw new Error(_error);
+      response.access = _data.access_token;
+      response.refresh = _data.refresh_token
+      response.userDetails = {userId: userDetails.id, userPhone: userDetails.phone, userRole: userDetails.role}
+      return res.status(200).json(response);
+    }
 
-    sessionUser = anonData;
-    console.log('session user: ', anonData)
+    console.log("user has account")
+    const {_error: someError, _data, _success: someSuccess} = await generateTokens(user.id , user.phone)
+      if(!someSuccess) throw new Error(someError);
+      response.access = _data.access_token;
+      response.refresh = _data.refresh_token
+      response.userDetails = {userId: user.id, userPhone: user.phone, userRole: user.role}
 
-    //  Merge/update user_metadata with phone
-    const updatedMetadata = existingUser
-      ? { ...existingUser.user_metadata, phone }
-      : { phone };
-
-    const { data: updatedUser, error: updateError } =
-      await supabaseAdmin.auth.admin.updateUserById(sessionUser.user.id, {
-        user_metadata: updatedMetadata,
-      });
-
-    if (updateError) throw new Error(updateError.message);
-
-    // Return session info
-    return res.status(200).json({
-      access_token: sessionUser.session.access_token,
-      refresh_token: sessionUser.session.refresh_token,
-      user: updatedUser,
-    });
+    return res.status(200).json(response)
   } catch (error) {
     return res.status(400).json({ success: false, message: error.message });
   }
 };
 
+export const refreshingToken = async (req, res) => {
+   const {userId, refresh_token} = req.body; 
+
+   //fetch the refreshToken with the userId
+   
+}

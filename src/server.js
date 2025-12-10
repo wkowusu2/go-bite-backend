@@ -10,7 +10,6 @@ const port = process.env.PORT || 3000;
 
 async function startServer() {
   try {
-    // connect to DB before starting server
     await dbConnect();
 
     const app = express();
