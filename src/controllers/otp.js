@@ -49,7 +49,7 @@ export const verifyOtp = async (req, res) => {
 
   try {
     // Get OTP from DB
-    const { success, error, savedOtp } = await getOtp(phone);
+    const { success, error, savedOtp } = await getOtp(phone, otp);
     if (!success) throw new Error(error);
 
     if (savedOtp) {

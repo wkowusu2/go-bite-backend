@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import {getDb} from '../config/db.config.js';
 import {otpTable} from '../schema/otp.js'
 import { customerProfileTable } from '../schema/customerProfile.js';
@@ -17,9 +17,9 @@ export async function saveOtp(phone, otp){
     }
 }
 
-export async function getOtp(phone) {
+export async function getOtp(phone, otp) {
     try {
-        const [row] = await db.select().from(otpTable).where(eq(otpTable.phoneNumber, phone)); 
+        const [row] = await db.select().from(otpTable).where(and(eq(otpTable.phoneNumber, phone), eq(otpTable.otp, otp))); 
         if(!row) throw new Error("Otp not found");
         return {success: true, error: null, savedOtp: row}
     } catch (error) {
