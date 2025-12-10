@@ -81,3 +81,27 @@ export async function insertRefreshToken(refreshTokenDetail) {
     }
 }
 
+export async function getRefreshToken(userId, incomingrefreshToken) {
+    try {
+        const [savedRefresh] = await db.select().from(refreshToken).where( eq(refreshToken.refreshToken, incomingrefreshToken));
+
+        if(!savedRefresh) throw new Error("Token not found");
+        return {success: true, error: null, data: savedRefresh}
+    } catch (error) {
+        console.log("Error from refreshing the token: ", error)
+        return {success: false, error: error.message}
+    } 
+}
+
+export async function revokeToken(tokenToBeRevoke) {
+    try {
+        const [savedToken] = await db.update(refreshToken).set({lastUsedAt: new Date(), revoked: true}).where(eq(refreshToken.refreshToken, tokenToBeRevoke)).returning()
+        if(!savedToken) throw new Error("Revoking token failed");
+        return {success: true, error: null};
+    } catch (error) {
+        console.log("Error from revoking token: ", error);
+        return {success: false, error: error.message};
+    }
+    
+}
+

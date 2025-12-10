@@ -1,8 +1,9 @@
 import { config } from "dotenv";
 import { randomInt } from 'crypto';
 import axios from 'axios'
-import { createUser, deleteOtp, getOtp, getUserByPhone, saveOtp } from "../service/dbService.js";
+import { createUser, deleteOtp, getOtp, getRefreshToken, getUserByPhone, revokeToken, saveOtp } from "../service/dbService.js";
 import { generateTokens } from "../service/jwtService.js";
+import { hashToken } from "../../utils/cryptoHelper.js";
 
 config()
 export const sendOtp = async (req, res) => {
@@ -91,8 +92,33 @@ export const verifyOtp = async (req, res) => {
 };
 
 export const refreshingToken = async (req, res) => {
-   const {userId, refresh_token} = req.body; 
+  const response = {success: true, access: '', refresh: '',};
+   try {
+    const {userId, refresh_token, phone} = req.body; 
 
-   //fetch the refreshToken with the userId
-   
+   //hash the refresh token
+   const hashedRefreshToken = hashToken(refresh_token)
+   const {success, error, data} = await getRefreshToken(userId, hashedRefreshToken)
+   if(!success) throw new Error(error)
+    const now = new Date()
+    const expired = now > data.expiresAt 
+    if(expired) throw new Error("Refresh token is expired");
+    if(data.revoked) throw new Error("Refresh token is revoked");
+
+    //revoke the old token 
+    const { success: revoke_success, error: revoke_error } = await revokeToken(data.refreshToken);
+    if(!revoke_success) throw new Error(revoke_error)
+
+
+    const {_error: someError, _data, _success: someSuccess} = await generateTokens(userId , phone)
+      if(!someSuccess) throw new Error(someError);
+      response.access = _data.access_token;
+      response.refresh = _data.refresh_token;
+
+      return res.status(200).json(response);
+    //
+   } catch (error) {
+      console.log("error: ", error)
+      return res.status(400).json({ success: false, error: error.message });
+   }
 }

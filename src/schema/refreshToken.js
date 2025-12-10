@@ -1,7 +1,7 @@
 import { boolean, pgTable, text, timestamp, uuid, } from "drizzle-orm/pg-core";
 import { users } from "./users.js";
 
-export const refreshToken = pgTable('refresh_toke', {
+export const refreshToken = pgTable('refresh_tokens', {
     id: uuid().defaultRandom().primaryKey(),
     userId: uuid('user_id').notNull().references(() => users.id, {
         onDelete:"cascade",
