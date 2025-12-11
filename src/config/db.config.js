@@ -11,6 +11,7 @@ const pool = new Pool({
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis:20000,
     keepAlive: true,
+    ssl: { rejectUnauthorized: false },
 })
 
 export const dbConnect = async () => {
@@ -18,8 +19,10 @@ export const dbConnect = async () => {
   try {
     await client.query("SELECT 1") ;       
     console.log("Database connected ✔");
-  } finally {
     client.release();
+  }
+  catch (err) {
+    console.error("Database connection failed (startup). Retrying...");
   }
 }
 
