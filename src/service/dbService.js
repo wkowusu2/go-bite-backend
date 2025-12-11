@@ -116,3 +116,18 @@ export async function findCustomerProfileWithId(userId) {
         return {success: false, error: error.message};
     }
 }
+
+export async function updateCustomerProfile(updateDetails) {
+    console.log("update details: ", updateDetails)
+    try {
+    const now = new Date()
+    const record = await db.update(customerProfileTable).set({fullName: updateDetails.fullName, email: updateDetails.email, updatedAt: now}).where(eq(customerProfileTable.userId,updateDetails.userId)).returning();
+
+    if(record.length === 0) throw new Error('Profile not found');
+
+    return {success: true, error: null, data: record[0]}
+    } catch (error) {
+        console.log("Error from upate customer profile: ", error)
+        return {success: false, error: error.message}
+    }
+}

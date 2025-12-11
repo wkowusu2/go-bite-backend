@@ -9,7 +9,7 @@ export async function generateTokens(userId, phone,) {
     const secret = process.env.JWT_SECRET;
     const userDetails = {sub: userId, phone: phone};
 
-    const access_expiry = 15 * 60 * 1000;
+    const access_expiry = 15 * 60 ;
     const access_token = sign(userDetails,secret, {expiresIn: access_expiry});
 
     const {actulToken, hashedToken} = generateRefreshToken();

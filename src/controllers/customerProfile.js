@@ -1,4 +1,4 @@
-import { createCustomerProfile, findCustomerProfileWithId } from "../service/dbService.js";
+import { createCustomerProfile, findCustomerProfileWithId, updateCustomerProfile } from "../service/dbService.js";
 
 export async function createProfile(req, res) {
     const {fullName, email, userId} = req.body; 
@@ -34,6 +34,24 @@ export async function getProfile(req, res) {
 
     } catch (error) {
         console.log("Error from getting profile")
+        return res.status(404).json({success: false, error: error.message})
+    }
+}
+
+export async function updateProfile(req,res) {
+    try {
+        const {fullName, email} = req.body;
+        const {sub} = req.user;
+        console.log("userId: ", sub)
+
+        const profileDetails = {fullName: fullName, email: email, userId: sub}
+
+        const {success, error, data} = await updateCustomerProfile(profileDetails);
+        if(!success) throw new Error(error);
+
+        return res.status(200).json({success: true, error: null, data: data})
+    } catch (error) {
+        console.log("Error from updating profile");
         return res.status(404).json({success: false, error: error.message})
     }
 }
