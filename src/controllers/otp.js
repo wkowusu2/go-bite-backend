@@ -45,7 +45,12 @@ export const sendOtp = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
   const response = {success: true, access: '', refresh: '', userDetails: {}};
-  const { phone, otp } = req.body;
+  const { phone, otp, role } = req.body;
+  const roles = ['CUSTOMER', 'ADMIN', 'VENDOR_ADMIN', 'RIDER']
+
+  if(!roles.includes(role)) {
+    return res.status(401).json({success: false, error: "You are not permitted to access the app"})
+  }
 
   try {
     // Get OTP from DB
@@ -67,7 +72,7 @@ export const verifyOtp = async (req, res) => {
 
     if(!user){
       console.log("no user found")
-      const {error, success,userDetails} = await createUser(phone)
+      const {error, success,userDetails} = await createUser(phone, role)
       if(!success) throw new Error(error)
       //create session data 
       const {_error, _data, _success} = await generateTokens(userDetails.id, userDetails.phone)

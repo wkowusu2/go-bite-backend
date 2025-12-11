@@ -38,9 +38,9 @@ export async function deleteOtp(phone) {
     }
 }
 
-export async function createCustomerProfile(phone) {
+export async function createCustomerProfile(profileDetail) {
     try {
-        const [savedCustomer] = await db.insert(customerProfileTable).values({phoneNumber: phone}).returning();
+        const [savedCustomer] = await db.insert(customerProfileTable).values({userId: profileDetail.userId, fullName: profileDetail.fullName, email: profileDetail.email}).returning();
         if(!savedCustomer) throw new Error("Saving user failed");
         return {success: true, error: null, userDetails: savedCustomer}
     } catch (error) {
@@ -49,9 +49,9 @@ export async function createCustomerProfile(phone) {
     }
 }
 
-export async function createUser(phone) {
+export async function createUser(phone, role) {
     try {
-        const [savedUser] = await db.insert(users).values({phone: phone}).returning();
+        const [savedUser] = await db.insert(users).values({phone: phone, role: role}).returning();
         if(!savedUser) throw new Error("Saving user failed");
         return {success: true, error: null, userDetails: savedUser}
     } catch (error) {
@@ -105,3 +105,14 @@ export async function revokeToken(tokenToBeRevoke) {
     
 }
 
+export async function findCustomerProfileWithId(userId) {
+    try {
+        const [savedProfile] = (await db.select().from(customerProfileTable).where(eq(customerProfileTable.userId, userId)));
+    
+        if(!savedProfile) throw new Error("Profile does not exit");
+        return {success: true, error: null, data: savedProfile};
+    } catch (error) {
+        console.log("Error from find profile");
+        return {success: false, error: error.message};
+    }
+}

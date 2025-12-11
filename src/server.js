@@ -5,6 +5,7 @@ import { supabaseAdmin } from './config/supabaseAdmin.js'
 import router from './routes/otp.js';
 import { logger } from '../logger.js';
 import { closeDb, dbConnect } from './config/db.config.js'
+import profile from './routes/profile.js'
 
 const port = process.env.PORT || 3000;
 
@@ -23,6 +24,7 @@ async function startServer() {
     app.use(logger);
 
     app.use('/api/availability', health);
+    app.use('/api/v1/profiles', profile);
     app.use('/api/v1/', router);
 
     app.listen(port, () => {
