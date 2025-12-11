@@ -4,6 +4,7 @@ import {otpTable} from '../schema/otp.js'
 import { customerProfileTable } from '../schema/customerProfile.js';
 import { refreshToken } from '../schema/refreshToken.js';
 import { users } from '../schema/users.js';
+import { riderProfiles } from '../schema/riderProfile.js';
 
 const db = getDb(); 
 export async function saveOtp(phone, otp){
@@ -45,6 +46,17 @@ export async function createCustomerProfile(profileDetail) {
         return {success: true, error: null, userDetails: savedCustomer}
     } catch (error) {
         console.log("Error from createProfile: ", error)
+        return {success: false, error: error.message}
+    }
+}
+
+export async function createRiderProfiles(profileDetail) {
+    try {
+        const [savedRider] = await db.insert(riderProfiles).values({userId: profileDetail.userId, fullName: profileDetail.fullName, email: profileDetail.email}).returning();
+        if(!savedRider) throw new Error("Saving user failed");
+        return {success: true, error: null, userDetails: savedRider}
+    } catch (error) {
+        console.log("Error from create rider Profile: ", error)
         return {success: false, error: error.message}
     }
 }
@@ -117,6 +129,18 @@ export async function findCustomerProfileWithId(userId) {
     }
 }
 
+export async function findRiderProfileWithId(userId) {
+    try {
+        const [savedProfile] = (await db.select().from(riderProfiles).where(eq(riderProfiles.userId, userId)));
+    
+        if(!savedProfile) throw new Error("Profile does not exit");
+        return {success: true, error: null, data: savedProfile};
+    } catch (error) {
+        console.log("Error from find profile");
+        return {success: false, error: error.message};
+    }
+}
+
 export async function updateCustomerProfile(updateDetails) {
     console.log("update details: ", updateDetails)
     try {
@@ -131,3 +155,19 @@ export async function updateCustomerProfile(updateDetails) {
         return {success: false, error: error.message}
     }
 }
+
+export async function updateRidersProfile(updateDetails) {
+    console.log("update details: ", updateDetails)
+    try {
+    const now = new Date()
+    const record = await db.update(riderProfiles).set({fullName: updateDetails.fullName, email: updateDetails.email, updatedAt: now}).where(eq(riderProfiles.userId,updateDetails.userId)).returning();
+
+    if(record.length === 0) throw new Error('Profile not found');
+
+    return {success: true, error: null, data: record[0]}
+    } catch (error) {
+        console.log("Error from upate rider profile: ", error)
+        return {success: false, error: error.message}
+    }
+}
+
