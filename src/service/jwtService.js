@@ -4,10 +4,10 @@ import { insertRefreshToken } from './dbService.js';
 
 const {sign, verify} = jwtPkg;
 
-export async function generateTokens(userId, phone,) {
+export async function generateTokens(userId, phone, role) {
  try {
     const secret = process.env.JWT_SECRET;
-    const userDetails = {sub: userId, phone: phone};
+    const userDetails = {sub: userId, phone: phone, role: role};
 
     const access_expiry = 15 * 60 ;
     const access_token = sign(userDetails,secret, {expiresIn: access_expiry});

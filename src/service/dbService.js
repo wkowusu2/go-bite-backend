@@ -171,3 +171,92 @@ export async function updateRidersProfile(updateDetails) {
     }
 }
 
+export async function updateCustomersAvatar(updateDetails) {
+    console.log("update details: ", updateDetails)
+    try {
+    const now = new Date()
+    const record = await db.update(customerProfileTable).set({ avatarUrl: updateDetails.avatarUrl ,updatedAt: now}).where(eq(customerProfileTable.userId,updateDetails.userId)).returning();
+
+    if(record.length === 0) throw new Error('Profile not found');
+
+    return {success: true, error: null, data: record[0]}
+    } catch (error) {
+        console.log("Error from upate customer avatar: ", error)
+        return {success: false, error: error.message}
+    }
+}
+
+export async function updateRidersAvatar(updateDetails) {
+    console.log("update details: ", updateDetails)
+    try {
+    const now = new Date()
+    const record = await db.update(riderProfiles).set({ avatarUrl: updateDetails.avatarUrl ,updatedAt: now}).where(eq(riderProfiles.userId,updateDetails.userId)).returning();
+
+    if(record.length === 0) throw new Error('Profile not found');
+
+    return {success: true, error: null, data: record[0]}
+    } catch (error) {
+        console.log("Error from upate rider avatar: ", error)
+        return {success: false, error: error.message}
+    }
+}
+
+export async function updateCustomersPushToken(updateDetails) {
+    console.log("update details: ", updateDetails)
+    try {
+    const now = new Date()
+    const record = await db.update(customerProfileTable).set({ pushToken: updateDetails.pushToken ,updatedAt: now}).where(eq(customerProfileTable.userId,updateDetails.userId)).returning();
+
+    if(record.length === 0) throw new Error('Profile not found');
+
+    return {success: true, error: null, data: record[0]}
+    } catch (error) {
+        console.log("Error from upate customer push: ", error)
+        return {success: false, error: error.message}
+    }
+}
+
+export async function updateRidersPushToken(updateDetails) {
+    console.log("update details: ", updateDetails)
+    try {
+    const now = new Date()
+    const record = await db.update(riderProfiles).set({ pushToken: updateDetails.pushToken ,updatedAt: now}).where(eq(riderProfiles.userId,updateDetails.userId)).returning();
+
+    if(record.length === 0) throw new Error('Profile not found');
+
+    return {success: true, error: null, data: record[0]}
+    } catch (error) {
+        console.log("Error from upate rider push token: ", error)
+        return {success: false, error: error.message}
+    }
+}
+
+export async function updateRidersOnlineStatus(updateDetails) {
+    console.log("update details: ", updateDetails)
+    try {
+    const now = new Date()
+    const record = await db.update(riderProfiles).set({ onlineStatus: updateDetails.onlineStatus ,updatedAt: now}).where(eq(riderProfiles.userId,updateDetails.userId)).returning();
+
+    if(record.length === 0) throw new Error('Profile not found');
+
+    return {success: true, error: null, data: record[0]}
+    } catch (error) {
+        console.log("Error from upate rider online status: ", error)
+        return {success: false, error: error.message}
+    }
+}
+
+export async function updateRiderApprovalStatus(updateDetails) {
+    console.log("update details: ", updateDetails)
+    try {
+    const now = new Date()
+    const record = await db.update(riderProfiles).set({ approvalStatus: updateDetails.approvalStatus ,updatedAt: now}).where(eq(riderProfiles.userId,updateDetails.userId)).returning();
+
+    if(record.length === 0) throw new Error('Profile not found');
+
+    return {success: true, error: null}
+    } catch (error) {
+        console.log("Error from upate rider approval status: ", error)
+        return {success: false, error: error.message}
+    }
+}

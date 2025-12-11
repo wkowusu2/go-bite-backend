@@ -1,4 +1,4 @@
-import { createCustomerProfile, findCustomerProfileWithId, updateCustomerProfile } from "../service/dbService.js";
+import { createCustomerProfile, findCustomerProfileWithId, updateCustomerProfile, updateCustomersAvatar, updateCustomersPushToken } from "../service/dbService.js";
 
 export async function createProfile(req, res) {
     const {fullName, email} = req.body; 
@@ -53,6 +53,42 @@ export async function updateProfile(req,res) {
         return res.status(200).json({success: true, error: null, data: data})
     } catch (error) {
         console.log("Error from updating profile");
+        return res.status(404).json({success: false, error: error.message})
+    }
+} 
+
+export async function updateCutomerAvatar(req, res) {
+    try {
+        const {avatarUrl} = req.body;
+        const {sub} = req.user;
+        console.log("userId: ", sub)
+
+        const profileDetails = {avatarUrl: avatarUrl, userId: sub}
+
+        const {success, error, data} = await updateCustomersAvatar(profileDetails);
+        if(!success) throw new Error(error);
+
+        return res.status(200).json({success: true, error: null, data: data})
+    } catch (error) {
+        console.log("Error from updating rider avatar");
+        return res.status(404).json({success: false, error: error.message})
+    }
+} 
+
+export async function updateCustomerPushToken(req, res) {
+    try {
+        const {pushToken} = req.body;
+        const {sub} = req.user;
+        console.log("userId: ", sub)
+
+        const profileDetails = {pushToken: pushToken, userId: sub}
+
+        const {success, error, data} = await updateCustomersPushToken(profileDetails);
+        if(!success) throw new Error(error);
+
+        return res.status(200).json({success: true, error: null, data: data})
+    } catch (error) {
+        console.log("Error from updating rider avatar");
         return res.status(404).json({success: false, error: error.message})
     }
 }

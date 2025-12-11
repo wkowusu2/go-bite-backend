@@ -75,7 +75,7 @@ export const verifyOtp = async (req, res) => {
       const {error, success,userDetails} = await createUser(phone, role)
       if(!success) throw new Error(error)
       //create session data 
-      const {_error, _data, _success} = await generateTokens(userDetails.id, userDetails.phone)
+      const {_error, _data, _success} = await generateTokens(userDetails.id, userDetails.phone, role)
       if(!_success) throw new Error(_error);
       response.access = _data.access_token;
       response.refresh = _data.refresh_token
@@ -84,7 +84,7 @@ export const verifyOtp = async (req, res) => {
     }
 
     console.log("user has account")
-    const {_error: someError, _data, _success: someSuccess} = await generateTokens(user.id , user.phone)
+    const {_error: someError, _data, _success: someSuccess} = await generateTokens(user.id , user.phone, role)
       if(!someSuccess) throw new Error(someError);
       response.access = _data.access_token;
       response.refresh = _data.refresh_token
@@ -99,7 +99,7 @@ export const verifyOtp = async (req, res) => {
 export const refreshingToken = async (req, res) => {
   const response = {success: true, access: '', refresh: '',};
    try {
-    const {userId, refresh_token, phone} = req.body; 
+    const {userId, refresh_token, phone, role} = req.body; 
 
    //hash the refresh token
    const hashedRefreshToken = hashToken(refresh_token)
@@ -115,7 +115,7 @@ export const refreshingToken = async (req, res) => {
     if(!revoke_success) throw new Error(revoke_error)
 
 
-    const {_error: someError, _data, _success: someSuccess} = await generateTokens(userId , phone)
+    const {_error: someError, _data, _success: someSuccess} = await generateTokens(userId , phone, role)
       if(!someSuccess) throw new Error(someError);
       response.access = _data.access_token;
       response.refresh = _data.refresh_token;

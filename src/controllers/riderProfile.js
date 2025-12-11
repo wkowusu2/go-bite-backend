@@ -1,4 +1,4 @@
-import { createRiderProfiles, findRiderProfileWithId, updateRidersProfile } from "../service/dbService.js";
+import { createRiderProfiles, findRiderProfileWithId, updateRidersAvatar, updateRidersOnlineStatus, updateRidersProfile, updateRidersPushToken } from "../service/dbService.js";
 
 export async function createRiderProfile(req, res) {
     const {fullName, email} = req.body; 
@@ -53,6 +53,60 @@ export async function updateRiderProfile(req,res) {
         return res.status(200).json({success: true, error: null, data: data})
     } catch (error) {
         console.log("Error from updating profile");
+        return res.status(404).json({success: false, error: error.message})
+    }
+}
+
+export async function updateRiderAvatar(req, res) {
+    try {
+        const {avatarUrl} = req.body;
+        const {sub} = req.user;
+        console.log("userId: ", sub)
+
+        const profileDetails = {avatarUrl: avatarUrl, userId: sub}
+
+        const {success, error, data} = await updateRidersAvatar(profileDetails);
+        if(!success) throw new Error(error);
+
+        return res.status(200).json({success: true, error: null, data: data})
+    } catch (error) {
+        console.log("Error from updating rider avatar");
+        return res.status(404).json({success: false, error: error.message})
+    }
+} 
+
+export async function updateRiderPushToken(req, res) {
+    try {
+        const {pushToken} = req.body;
+        const {sub} = req.user;
+        console.log("userId: ", sub)
+
+        const profileDetails = {pushToken: pushToken, userId: sub}
+
+        const {success, error, data} = await updateRidersPushToken(profileDetails);
+        if(!success) throw new Error(error);
+
+        return res.status(200).json({success: true, error: null, data: data})
+    } catch (error) {
+        console.log("Error from updating rider avatar");
+        return res.status(404).json({success: false, error: error.message})
+    }
+}
+
+export async function updateRiderOnlineStatus(req, res) {
+    try {
+        const {onlineStatus} = req.body;
+        const {sub} = req.user;
+        console.log("userId: ", sub)
+
+        const profileDetails = {onlineStatus: onlineStatus, userId: sub}
+
+        const {success, error, data} = await updateRidersOnlineStatus(profileDetails);
+        if(!success) throw new Error(error);
+
+        return res.status(200).json({success: true, error: null, data: data})
+    } catch (error) {
+        console.log("Error from updating rider avatar");
         return res.status(404).json({success: false, error: error.message})
     }
 }
