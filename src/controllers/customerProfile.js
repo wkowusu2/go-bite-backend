@@ -1,12 +1,13 @@
 import { createCustomerProfile, findCustomerProfileWithId, updateCustomerProfile } from "../service/dbService.js";
 
 export async function createProfile(req, res) {
-    const {fullName, email, userId} = req.body; 
-    const profileDetails = {userId: userId, fullName: fullName, email: email};
+    const {fullName, email} = req.body; 
+    const {sub} = req.user;
+    const profileDetails = {userId: sub, fullName: fullName, email: email};
     
     try {
         //check to see if there's a profile with the id
-        const {success, error, data} = await findCustomerProfileWithId(userId);
+        const {success, error, data} = await findCustomerProfileWithId(sub);
         //a network error occurred or something similar to that 
         if(error && error != "Profile does not exit") throw new Error(error);
         if(success) throw new Error("Profile already exists, consider updating"); 
