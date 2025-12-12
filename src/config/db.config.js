@@ -12,7 +12,11 @@ const pool = new Pool({
     connectionTimeoutMillis:20000,
     keepAlive: true,
     ssl: { rejectUnauthorized: false },
-})
+}); 
+
+pool.on('error', (err, client) => {
+    console.error('Unexpected error on idle client', err);
+});
 
 export const dbConnect = async () => {
     const client = await pool.connect();
