@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm"
-import { getDb } from "../config/db.config"
+import { getDb } from "../config/db.config.js"
 
 export const home = (req, res) => {
     return res.json("Welcome to the custom backend for goBite")
