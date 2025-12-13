@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import { randomInt } from 'crypto';
 import axios from 'axios'
-import { createUser, deleteOtp, getOtp, getRefreshToken, getUserByPhone, revokeToken, saveOtp } from "../service/dbService.js";
+import { createUser, customerHasProfile, deleteOtp, getOtp, getRefreshToken, getUserByPhone, revokeToken, riderHasProfile, saveOtp } from "../service/dbService.js";
 import { generateTokens } from "../service/jwtService.js";
 import { hashToken } from "../../utils/cryptoHelper.js";
 
@@ -44,7 +44,7 @@ export const sendOtp = async (req, res) => {
 
 
 export const verifyOtp = async (req, res) => {
-  const response = {success: true, access: '', refresh: '', userDetails: {}};
+  const response = {success: true, access: '', refresh: '', userDetails: {}, hasProfile: null};
   const { phone, otp, role } = req.body;
   const roles = ['CUSTOMER', 'ADMIN', 'VENDOR_ADMIN', 'RIDER']
 
@@ -73,7 +73,18 @@ export const verifyOtp = async (req, res) => {
     if(!user){
       console.log("no user found")
       const {error, success,userDetails} = await createUser(phone, role)
-      if(!success) throw new Error(error)
+      if(!success) throw new Error(error); 
+      if(role == 'CUSTOMER'){
+        const {error, success, hasProfile} = await customerHasProfile(userDetails.id);
+        if(!success) throw new Error(error);
+        response.hasProfile = hasProfile
+      }
+      else if(role == 'RIDER'){
+        const {error, success, hasProfile} = await riderHasProfile(userDetails.id);
+        if(!success) throw new Error(error);
+        response.hasProfile = hasProfile
+      }
+
       //create session data 
       const {_error, _data, _success} = await generateTokens(userDetails.id, userDetails.phone, role)
       if(!_success) throw new Error(_error);
@@ -86,6 +97,16 @@ export const verifyOtp = async (req, res) => {
     console.log("user has account")
     const {_error: someError, _data, _success: someSuccess} = await generateTokens(user.id , user.phone, role)
       if(!someSuccess) throw new Error(someError);
+      if(role == 'CUSTOMER'){
+        const {error, success, hasProfile} = await customerHasProfile(user.id);
+        if(!success) throw new Error(error);
+        response.hasProfile = hasProfile
+      }
+      else if(role == 'RIDER'){
+        const {error, success, hasProfile} = await riderHasProfile(user.id);
+        if(!success) throw new Error(error);
+        response.hasProfile = hasProfile
+      }
       response.access = _data.access_token;
       response.refresh = _data.refresh_token
       response.userDetails = {userId: user.id, userPhone: user.phone, userRole: user.role}

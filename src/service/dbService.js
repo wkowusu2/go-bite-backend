@@ -260,3 +260,32 @@ export async function updateRiderApprovalStatus(updateDetails) {
         return {success: false, error: error.message}
     }
 }
+
+export async function customerHasProfile(userId) {
+    try {
+        console.log("userId: ", userId);
+        const [profile] = await db.select({id: customerProfileTable.id }).from(customerProfileTable).where(eq(customerProfileTable.userId, userId)).limit(1);
+        if(!profile) {
+            return {success: true,hasProfile: false, error: null};
+        }
+        return {success: true,hasProfile: true, error: null};
+    } catch (error) {
+        console.log("Some error occurred while checking the profile: ", error);
+        return {success: false, error: error.message};
+    }
+}
+
+export async function riderHasProfile(userId) {
+    try {
+        console.log("userId: ", userId);
+        const [profile] = await db.select({id: riderProfiles.id }).from(riderProfiles).where(eq(riderProfiles.userId, userId)).limit(1);
+       
+        if(!profile) {
+            return {success: true,hasProfile: false, error: null};
+        }
+        return {success: true,hasProfile: false, error: null};
+    } catch (error) {
+        console.log("Some error occurred while checking the profile: ", error);
+        return {success: false, error: error.message};
+    }
+}
