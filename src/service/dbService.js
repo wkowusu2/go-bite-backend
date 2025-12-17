@@ -316,7 +316,8 @@ export async function createIsGuest(userId, status) {
 
 export async function updateIsGuest(userId, reqStatus) {
     try {
-        const [status] = await db.update(isUserGuest).set({isGuest: reqStatus}).where(eq(isUserGuest.userId, userId)).returning();
+        const now = new Date()
+        const [status] = await db.update(isUserGuest).set({isGuest: reqStatus, updatedAt: now}).where(eq(isUserGuest.userId, userId)).returning();
         if(!status) throw new Error("User does not exist")
         return {success: true, error: null, data: status}
     } catch (error) {
