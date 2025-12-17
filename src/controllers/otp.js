@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import { randomInt } from 'crypto';
 import axios from 'axios'
-import { createUser, customerHasProfile, deleteOtp, getOtp, getRefreshToken, getUserByPhone, revokeToken, riderHasProfile, saveOtp } from "../service/dbService.js";
+import { createUser, customerHasProfile, deleteOtp, getOtp, getRefreshToken, getUserByPhone, isGuest, revokeToken, riderHasProfile, saveOtp } from "../service/dbService.js";
 import { generateTokens } from "../service/jwtService.js";
 import { hashToken } from "../../utils/cryptoHelper.js";
 
@@ -44,7 +44,7 @@ export const sendOtp = async (req, res) => {
 
 
 export const verifyOtp = async (req, res) => {
-  const response = {success: true, access: '', refresh: '', userDetails: {}, hasProfile: null};
+  const response = {success: true, access: '', refresh: '', userDetails: {}, hasProfile: null, isGuest: null};
   const { phone, otp, role } = req.body;
   const roles = ['CUSTOMER', 'ADMIN', 'VENDOR_ADMIN', 'RIDER']
 
@@ -77,7 +77,12 @@ export const verifyOtp = async (req, res) => {
       if(role == 'CUSTOMER'){
         const {error, success, hasProfile} = await customerHasProfile(userDetails.id);
         if(!success) throw new Error(error);
-        response.hasProfile = hasProfile
+        response.hasProfile = hasProfile;
+
+        const {data, error: guest_error, success: guest_success} = await isGuest(userDetails.id);
+        if(!guest_success) throw new Error(guest_error);
+        response.isGuest = data; 
+        
       }
       else if(role == 'RIDER'){
         const {error, success, hasProfile} = await riderHasProfile(userDetails.id);
@@ -100,7 +105,11 @@ export const verifyOtp = async (req, res) => {
       if(role == 'CUSTOMER'){
         const {error, success, hasProfile} = await customerHasProfile(user.id);
         if(!success) throw new Error(error);
-        response.hasProfile = hasProfile
+        response.hasProfile = hasProfile; 
+
+        const {data, error: guest_error, success: guest_success} = await isGuest(user.id);
+        if(!guest_success) throw new Error(guest_error);
+        response.isGuest = data;
       }
       else if(role == 'RIDER'){
         const {error, success, hasProfile} = await riderHasProfile(user.id);

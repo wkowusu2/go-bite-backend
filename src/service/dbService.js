@@ -5,6 +5,7 @@ import { customerProfileTable } from '../schema/customerProfile.js';
 import { refreshToken } from '../schema/refreshToken.js';
 import { users } from '../schema/users.js';
 import { riderProfiles } from '../schema/riderProfile.js';
+import { isUserGuest } from '../schema/isGuest.js';
 
 const db = getDb(); 
 export async function saveOtp(phone, otp){
@@ -287,5 +288,51 @@ export async function riderHasProfile(userId) {
     } catch (error) {
         console.log("Some error occurred while checking the profile: ", error);
         return {success: false, error: error.message};
+    }
+}
+
+export async function isGuest(userId) {
+    try {
+        const [guest] = await db.select({isGuest: isUserGuest.isGuest }).from(isUserGuest).where(eq(isUserGuest.userId, userId));
+        if(!guest){
+            return {success: true, data: null, error: null}
+        } 
+        return {success: true, error: null, data: guest}
+    } catch (error) {
+        console.log("Error from find user as guest ", error);
+        return {success: false, error: error.message, data: null}
+    }
+}
+
+export async function createIsGuest(userId, status) {
+    try {
+        const [record] = await db.insert(isUserGuest).values({isGuest: status, userId: userId}).returning();
+        return {success: true, error: null, data: record}
+    } catch (error) {
+        console.log("Error from inserting user as guest ", error);
+        return {success: false, error: error.message, data: null};
+    }
+}
+
+export async function updateIsGuest(userId, reqStatus) {
+    try {
+        const [status] = await db.update(isUserGuest).set({isGuest: reqStatus}).where(eq(isUserGuest.userId, userId)).returning();
+        if(!status) throw new Error("User does not exist")
+        return {success: true, error: null, data: status}
+    } catch (error) {
+        console.log("Error from find user as guest ", error);
+        return {success: false, error: error.message, data: null}
+    }
+}
+
+export async function getUserIsGuest(userId) {
+    try {
+        const [isGuest] = await db.select({isGuest: isUserGuest.isGuest}).from(isUserGuest).where(eq(isUserGuest.userId, userId)).limit(1);
+        if(!isGuest) throw new Error("User does not exist");
+
+        return {success: true, error: null, data: isGuest}
+    } catch (error) {
+        console.log("Error from getting user as guest ", error);
+        return {success: false, error: error.message, data: null}
     }
 }

@@ -1,4 +1,4 @@
-import { createCustomerProfile, findCustomerProfileWithId, updateCustomerProfile, updateCustomersAvatar, updateCustomersPushToken } from "../service/dbService.js";
+import { createCustomerProfile, createIsGuest, findCustomerProfileWithId, getUserIsGuest, updateCustomerProfile, updateCustomersAvatar, updateCustomersPushToken, updateIsGuest } from "../service/dbService.js";
 
 export async function createProfile(req, res) {
     const {fullName, email} = req.body; 
@@ -90,5 +90,59 @@ export async function updateCustomerPushToken(req, res) {
     } catch (error) {
         console.log("Error from updating rider avatar");
         return res.status(404).json({success: false, error: error.message})
+    }
+}
+
+export async function creatingIsGuest(req, res) {
+    try {
+        const {status} = req.body; 
+        const {sub} = req.user;
+
+        const {data, error, success} = await createIsGuest(sub, status); 
+        console.log("Data from creating user is guest ", data)
+        if(!success) throw new Error(error);
+
+        const response = {success: true, error: null, data: "Insert successful"}; 
+        return res.status(200).json(response);
+
+    } catch (error) {
+        console.log("Error from creating isGuest: ", error)
+        const response = {success: false, error: error.message, data: null};
+        return res.status(400).json(response);
+    }
+}
+
+export async function updatingIsGuest(req, res) {
+    try {
+        const {status} = req.body; 
+        const {sub} = req.user;
+
+        const {data, error, success} = await updateIsGuest(sub, status); 
+        console.log("Data from update is guest ", data)
+        if(!success) throw new Error(error);
+
+        const response = {success: true, error: null, data: "Update successful"}; 
+        return res.status(200).json(response);
+
+    } catch (error) {
+        console.log("Error from updating isGuest: ", error)
+        const response = {success: false, error: error.message, data: null};
+        return res.status(400).json(response);
+    }
+}
+
+export async function gettingIsguest(req, res) {
+    try {
+        const {sub} = req.user;
+
+        const {data, error, success} = await getUserIsGuest(sub);
+        if(!success) throw new Error(error);
+
+        const response = {success: true, error: null, data: data}; 
+        return res.status(200).json(response);
+    } catch (error) {
+        console.log('Error from getting isGuest: ', error);
+        const response = {success: false, error: error.message, data: null};
+        return res.status(400).json(response);
     }
 }
