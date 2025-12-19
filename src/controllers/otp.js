@@ -81,7 +81,11 @@ export const verifyOtp = async (req, res) => {
 
         const {data, error: guest_error, success: guest_success} = await isGuest(userDetails.id);
         if(!guest_success) throw new Error(guest_error);
-        response.isGuest = data; 
+        if(data == null){
+          response.isGuest = false;
+        }else{
+          response.isGuest = data;
+        }
         
       }
       else if(role == 'RIDER'){
@@ -109,7 +113,12 @@ export const verifyOtp = async (req, res) => {
 
         const {data, error: guest_error, success: guest_success} = await isGuest(user.id);
         if(!guest_success) throw new Error(guest_error);
-        response.isGuest = data;
+        console.log("is guest data from db: ", data)
+        if(data == null){
+          response.isGuest = false;
+        }else{
+          response.isGuest = data;
+        }
       }
       else if(role == 'RIDER'){
         const {error, success, hasProfile} = await riderHasProfile(user.id);
