@@ -82,7 +82,9 @@ export const verifyOtp = async (req, res) => {
         const {data, error: guest_error, success: guest_success} = await isGuest(userDetails.id);
         if(!guest_success) throw new Error(guest_error);
         if(data == null){
-          response.isGuest = false;
+          response.isGuest = {
+            isGuest: false
+          };
         }else{
           response.isGuest = data;
         }
@@ -115,7 +117,9 @@ export const verifyOtp = async (req, res) => {
         if(!guest_success) throw new Error(guest_error);
         console.log("is guest data from db: ", data)
         if(data == null){
-          response.isGuest = false;
+          response.isGuest = {
+            isGuest: false
+          };
         }else{
           response.isGuest = data;
         }
