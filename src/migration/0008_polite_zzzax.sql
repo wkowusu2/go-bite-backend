@@ -1,0 +1,1 @@
+ALTER TABLE "is_user_guest" ADD CONSTRAINT "is_user_guest_user_id_unique" UNIQUE("user_id");

@@ -306,10 +306,14 @@ export async function isGuest(userId) {
 
 export async function createIsGuest(userId, status) {
     try {
+        //check if there's a record already with the 
         const [record] = await db.insert(isUserGuest).values({isGuest: status, userId: userId}).returning();
         return {success: true, error: null, data: record}
     } catch (error) {
-        console.log("Error from inserting user as guest ", error);
+        console.log("Error from inserting user as guest ", error.cause);
+        if(error.cause == 'error: duplicate key value violates unique constraint "is_user_guest_user_id_unique"'){
+            return {success: false, error: "Record already exists, update it rather", data: null};
+        }
         return {success: false, error: error.message, data: null};
     }
 }

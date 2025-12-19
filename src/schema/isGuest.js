@@ -6,7 +6,7 @@ export const isUserGuest = pgTable('is_user_guest', {
     userId: uuid('user_id').references(() => users.id, {
         onDelete: "cascade",
         onUpdate: 'cascade'
-    }).notNull(),
+    }).notNull().unique(),
     isGuest: boolean('is_guest').default(false),
     createdAt: timestamp('create_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
