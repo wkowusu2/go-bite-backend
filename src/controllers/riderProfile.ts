@@ -1,8 +1,10 @@
+import { Request, Response } from "express";
 import { createRiderProfiles, findRiderProfileWithId, updateRidersAvatar, updateRidersOnlineStatus, updateRidersProfile, updateRidersPushToken } from "../service/dbService.js";
+import { JwtPayloadType } from "../types/jwtType.js";
 
-export async function createRiderProfile(req, res) {
+export async function createRiderProfile(req: Request, res: Response<{}, {user: JwtPayloadType}>) {
     const {fullName, email} = req.body; 
-    const {sub} = req.user
+    const {sub} = res.locals.user
     const profileDetails = {userId: sub, fullName: fullName, email: email};
     
     try {
@@ -17,32 +19,32 @@ export async function createRiderProfile(req, res) {
 
         return res.status(200).json({success: true, data: userDetails})
         
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from creating rider Profile: ", error);
         return res.status(400).json({success: false, error: error.message})
     }
 
 }
 
-export async function getRiderProfile(req, res) {
-    console.log("req,user: ", req.user)
-    const {sub} = req.user;
+export async function getRiderProfile(req: Request, res: Response<{}, {user: JwtPayloadType}>) {
+    console.log("req,user: ", res.locals.user)
+    const {sub} = res.locals.user;
     try {
         //check if profile exits 
         const {error, success, data} = await findRiderProfileWithId(sub);
         if(!success) throw new Error(error); 
         return res.status(200).json({success: true, error: null, data: data});
 
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from getting profile")
         return res.status(404).json({success: false, error: error.message})
     }
 }
 
-export async function updateRiderProfile(req,res) {
+export async function updateRiderProfile(req: Request, res: Response<{}, {user: JwtPayloadType}>) {
     try {
         const {fullName, email} = req.body;
-        const {sub} = req.user;
+        const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
         const profileDetails = {fullName: fullName, email: email, userId: sub}
@@ -51,16 +53,16 @@ export async function updateRiderProfile(req,res) {
         if(!success) throw new Error(error);
 
         return res.status(200).json({success: true, error: null, data: data})
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from updating profile");
         return res.status(404).json({success: false, error: error.message})
     }
 }
 
-export async function updateRiderAvatar(req, res) {
+export async function updateRiderAvatar(req: Request, res: Response<{}, {user: JwtPayloadType}>) {
     try {
         const {avatarUrl} = req.body;
-        const {sub} = req.user;
+        const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
         const profileDetails = {avatarUrl: avatarUrl, userId: sub}
@@ -69,16 +71,16 @@ export async function updateRiderAvatar(req, res) {
         if(!success) throw new Error(error);
 
         return res.status(200).json({success: true, error: null, data: data})
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from updating rider avatar");
         return res.status(404).json({success: false, error: error.message})
     }
 } 
 
-export async function updateRiderPushToken(req, res) {
+export async function updateRiderPushToken(req: Request, res: Response<{}, {user: JwtPayloadType}>) {
     try {
         const {pushToken} = req.body;
-        const {sub} = req.user;
+        const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
         const profileDetails = {pushToken: pushToken, userId: sub}
@@ -87,16 +89,16 @@ export async function updateRiderPushToken(req, res) {
         if(!success) throw new Error(error);
 
         return res.status(200).json({success: true, error: null, data: data})
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from updating rider avatar");
         return res.status(404).json({success: false, error: error.message})
     }
 }
 
-export async function updateRiderOnlineStatus(req, res) {
+export async function updateRiderOnlineStatus(req: Request, res: Response<{}, {user: JwtPayloadType}>) {
     try {
         const {onlineStatus} = req.body;
-        const {sub} = req.user;
+        const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
         const profileDetails = {onlineStatus: onlineStatus, userId: sub}
@@ -105,7 +107,7 @@ export async function updateRiderOnlineStatus(req, res) {
         if(!success) throw new Error(error);
 
         return res.status(200).json({success: true, error: null, data: data})
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from updating rider avatar");
         return res.status(404).json({success: false, error: error.message})
     }

@@ -1,8 +1,11 @@
+import { Request, Response } from "express";
 import { createCustomerProfile, createIsGuest, findCustomerProfileWithId, getUserIsGuest, updateCustomerProfile, updateCustomersAvatar, updateCustomersPushToken, updateIsGuest } from "../service/dbService.js";
+import { JwtPayloadType } from "../types/jwtType.js";
 
-export async function createProfile(req, res) {
+export async function createProfile(req: Request, res: Response<{}, {user: JwtPayloadType}>) {
     const {fullName, email} = req.body; 
-    const {sub} = req.user;
+    console.log("res.locals.user is :", res.locals.user)
+    const {sub} = res.locals.user;
     const profileDetails = {userId: sub, fullName: fullName, email: email};
     
     try {
@@ -17,32 +20,32 @@ export async function createProfile(req, res) {
 
         return res.status(200).json({success: true, data: userDetails})
         
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from createProfile: ", error);
         return res.status(400).json({success: false, error: error.message})
     }
 
 }
 
-export async function getProfile(req, res) {
-    console.log("req,user: ", req.user)
-    const {sub} = req.user;
+export async function getProfile(req: Request,res: Response<{}, {user: JwtPayloadType}>) {
+    console.log("req,user: ", res.locals.user)
+    const {sub} = res.locals.user;
     try {
         //check if profile exits 
         const {error, success, data} = await findCustomerProfileWithId(sub);
         if(!success) throw new Error(error); 
         return res.status(200).json({success: true, error: null, data: data});
 
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from getting profile")
         return res.status(404).json({success: false, error: error.message})
     }
 }
 
-export async function updateProfile(req,res) {
+export async function updateProfile(req: Request,res: Response<{}, {user: JwtPayloadType}>) {
     try {
         const {fullName, email} = req.body;
-        const {sub} = req.user;
+        const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
         const profileDetails = {fullName: fullName, email: email, userId: sub}
@@ -51,16 +54,16 @@ export async function updateProfile(req,res) {
         if(!success) throw new Error(error);
 
         return res.status(200).json({success: true, error: null, data: data})
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from updating profile");
         return res.status(404).json({success: false, error: error.message})
     }
 } 
 
-export async function updateCutomerAvatar(req, res) {
+export async function updateCutomerAvatar(req: Request,   res: Response<{}, {user: JwtPayloadType}>) {
     try {
         const {avatarUrl} = req.body;
-        const {sub} = req.user;
+        const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
         const profileDetails = {avatarUrl: avatarUrl, userId: sub}
@@ -69,16 +72,16 @@ export async function updateCutomerAvatar(req, res) {
         if(!success) throw new Error(error);
 
         return res.status(200).json({success: true, error: null, data: data})
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from updating rider avatar");
         return res.status(404).json({success: false, error: error.message})
     }
 } 
 
-export async function updateCustomerPushToken(req, res) {
+export async function updateCustomerPushToken(req: Request,   res: Response<{}, {user: JwtPayloadType}>) {
     try {
         const {pushToken} = req.body;
-        const {sub} = req.user;
+        const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
         const profileDetails = {pushToken: pushToken, userId: sub}
@@ -87,16 +90,16 @@ export async function updateCustomerPushToken(req, res) {
         if(!success) throw new Error(error);
 
         return res.status(200).json({success: true, error: null, data: data})
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from updating rider avatar");
         return res.status(404).json({success: false, error: error.message})
     }
 }
 
-export async function creatingIsGuest(req, res) {
+export async function creatingIsGuest(req: Request,   res: Response<{}, {user: JwtPayloadType}>) {
     try {
         const {status} = req.body; 
-        const {sub} = req.user;
+        const {sub} = res.locals.user;
 
         const {data, error, success} = await createIsGuest(sub, status); 
         console.log("Data from creating user is guest ", data)
@@ -105,17 +108,17 @@ export async function creatingIsGuest(req, res) {
         const response = {success: true, error: null, data: "Insert successful"}; 
         return res.status(200).json(response);
 
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from creating isGuest: ", error)
         const response = {success: false, error: error.message, data: null};
         return res.status(400).json(response);
     }
 }
 
-export async function updatingIsGuest(req, res) {
+export async function updatingIsGuest(req: Request,   res: Response<{}, {user: JwtPayloadType}>) {
     try {
         const {status} = req.body; 
-        const {sub} = req.user;
+        const {sub} = res.locals.user;
 
         const {data, error, success} = await updateIsGuest(sub, status); 
         console.log("Data from update is guest ", data)
@@ -124,23 +127,23 @@ export async function updatingIsGuest(req, res) {
         const response = {success: true, error: null, data: "Update successful"}; 
         return res.status(200).json(response);
 
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error from updating isGuest: ", error)
         const response = {success: false, error: error.message, data: null};
         return res.status(400).json(response);
     }
 }
 
-export async function gettingIsguest(req, res) {
+export async function gettingIsguest(req: Request,res: Response<{}, {user: JwtPayloadType}>) {
     try {
-        const {sub} = req.user;
+        const {sub} = res.locals.user;
 
         const {data, error, success} = await getUserIsGuest(sub);
         if(!success) throw new Error(error);
 
         const response = {success: true, error: null, data: data}; 
         return res.status(200).json(response);
-    } catch (error) {
+    } catch (error: any) {
         console.log('Error from getting isGuest: ', error);
         const response = {success: false, error: error.message, data: null};
         return res.status(400).json(response);

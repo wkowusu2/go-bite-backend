@@ -1,15 +1,16 @@
 import { sql } from "drizzle-orm"
 import { getDb } from "../config/db.config.js"
+import { Request, Response } from "express"
 
-export const home = (req, res) => {
+export const home = (req: Request, res: Response) => {
     return res.json("Welcome to the custom backend for goBite")
 }
 
-export const health = (req, res) => {
+export const health = (req: Request, res: Response) => {
     return res.json("Server is up and running successfully")
 }
 
-export const pingDb = async (req, res) => {
+export const pingDb = async (req: Request, res: Response) => {
    try {
     const db = getDb(); 
     await db.execute(sql`SELECT 1`);

@@ -3,7 +3,7 @@ import { randomInt } from 'crypto';
 import axios from 'axios'
 import { createUser, customerHasProfile, deleteOtp, getOtp, getRefreshToken, getUserByPhone, isGuest, revokeToken, riderHasProfile, saveOtp } from "../service/dbService.js";
 import { generateTokens } from "../service/jwtService.js";
-import { hashToken } from "../../utils/cryptoHelper.js";
+import { hashToken } from "../utils/cryptoHelper.js";
 
 config()
 export const sendOtp = async (req, res) => {

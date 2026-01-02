@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import health from './routes/health.js';
 import router from './routes/otp.js';
-import { logger } from '../logger.js';
+import { logger } from './logger.js';
 import { closeDb, dbConnect } from './config/db.config.js'
 import customerProfile from './routes/profile.js'
 import riderProfile from './routes/riderProfile.js'

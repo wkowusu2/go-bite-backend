@@ -6,7 +6,7 @@ export function generateRefreshToken(){
     return {actulToken: token, hashedToken: hashedRefreshToken};
 }
 
-export function hashToken(token){
+export function hashToken(token: string){
     const hashedRefreshToken = crypto.createHash('sha256').update(token).digest('hex');
     return hashedRefreshToken;
 }
