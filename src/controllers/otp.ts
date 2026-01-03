@@ -4,9 +4,11 @@ import axios from 'axios'
 import { createUser, customerHasProfile, deleteOtp, getOtp, getRefreshToken, getUserByPhone, isGuest, revokeToken, riderHasProfile, saveOtp } from "../service/dbService.js";
 import { generateTokens } from "../service/jwtService.js";
 import { hashToken } from "../utils/cryptoHelper.js";
+import { Request, Response } from "express";
+import { UserRole } from "../types/userRoles.js";
 
 config()
-export const sendOtp = async (req, res) => {
+export const sendOtp = async (req: Request, res: Response) => {
     const {phone} = req.body
     try {
         //generate the otp
@@ -20,8 +22,8 @@ export const sendOtp = async (req, res) => {
     if(!success) throw new Error(error)
     //send otp to phone number via hubtel
 
-    const clientId = process.env.HUBTEL_CLIENT_ID;
-    const clientSecret = process.env.HUBTEL_CLIENT_SECRET;
+    const clientId = process.env.HUBTEL_CLIENT_ID as string;
+    const clientSecret = process.env.HUBTEL_CLIENT_SECRET as string;
 
     const url = `https://smsc.hubtel.com/v1/messages/send?clientid=${clientId}&clientsecret=${clientSecret}&from=GoBite&to=${phone}&content=Your+otp+from+GoBite+is+${otp}`;
 
@@ -36,15 +38,15 @@ export const sendOtp = async (req, res) => {
     else{
         throw new Error("Failed to send OTP, please try again")
     }
-    }catch (error) {
+    }catch (error: any) {
         const response = {success: false, message: error.message}
         return res.status(400).json(response)
     }
 } 
 
 
-export const verifyOtp = async (req, res) => {
-  const response = {success: true, access: '', refresh: '', userDetails: {}, hasProfile: null, isGuest: null};
+export const verifyOtp = async (req: Request, res: Response) => {
+  const response: { success: boolean, access: string, refresh: string, userDetails: object, hasProfile: boolean | undefined, isGuest: boolean | null } = {success: true, access: '', refresh: '', userDetails: {}, hasProfile: false, isGuest: false};
   const { phone, otp, role } = req.body;
   const roles = ['CUSTOMER', 'ADMIN', 'VENDOR_ADMIN', 'RIDER']
 
@@ -75,39 +77,38 @@ export const verifyOtp = async (req, res) => {
       const {error, success,userDetails} = await createUser(phone, role)
       if(!success) throw new Error(error); 
       if(role == 'CUSTOMER'){
-        const {error, success, hasProfile} = await customerHasProfile(userDetails.id);
+        const {error, success, hasProfile} = await customerHasProfile(userDetails!.id);
         if(!success) throw new Error(error);
         response.hasProfile = hasProfile;
 
-        const {data, error: guest_error, success: guest_success} = await isGuest(userDetails.id);
+        const {data, error: guest_error, success: guest_success} = await isGuest(userDetails!.id);
+        console.log("is guest data is : ", data)
         if(!guest_success) throw new Error(guest_error);
         if(data == null){
-          response.isGuest = {
-            isGuest: false
-          };
+          response.isGuest = false;
         }else{
-          response.isGuest = data;
+          response.isGuest = data.isGuest;
         }
         
       }
       else if(role == 'RIDER'){
-        const {error, success, hasProfile} = await riderHasProfile(userDetails.id);
+        const {error, success, hasProfile} = await riderHasProfile(userDetails!.id);
         if(!success) throw new Error(error);
         response.hasProfile = hasProfile
       }
 
       //create session data 
-      const {_error, _data, _success} = await generateTokens(userDetails.id, userDetails.phone, role)
-      if(!_success) throw new Error(_error);
-      response.access = _data.access_token;
-      response.refresh = _data.refresh_token
-      response.userDetails = {userId: userDetails.id, userPhone: userDetails.phone, userRole: userDetails.role}
+      const {_error, _data, _success} = await generateTokens(userDetails!.id, userDetails!.phone, role)
+      if(!_success) throw new Error(_error!);
+      response.access = _data!.access_token;
+      response.refresh = _data!.refresh_token
+      response.userDetails = {userId: userDetails!.id, userPhone: userDetails!.phone, userRole: userDetails!.role}
       return res.status(200).json(response);
     }
 
     console.log("user has account")
     const {_error: someError, _data, _success: someSuccess} = await generateTokens(user.id , user.phone, role)
-      if(!someSuccess) throw new Error(someError);
+      if(!someSuccess) throw new Error(someError!);
       if(role == 'CUSTOMER'){
         const {error, success, hasProfile} = await customerHasProfile(user.id);
         if(!success) throw new Error(error);
@@ -117,11 +118,9 @@ export const verifyOtp = async (req, res) => {
         if(!guest_success) throw new Error(guest_error);
         console.log("is guest data from db: ", data)
         if(data == null){
-          response.isGuest = {
-            isGuest: false
-          };
+          response.isGuest = false;
         }else{
-          response.isGuest = data;
+          response.isGuest = data.isGuest;
         }
       }
       else if(role == 'RIDER'){
@@ -129,43 +128,43 @@ export const verifyOtp = async (req, res) => {
         if(!success) throw new Error(error);
         response.hasProfile = hasProfile
       }
-      response.access = _data.access_token;
-      response.refresh = _data.refresh_token
+      response.access = _data!.access_token;
+      response.refresh = _data!.refresh_token
       response.userDetails = {userId: user.id, userPhone: user.phone, userRole: user.role}
 
     return res.status(200).json(response)
-  } catch (error) {
+  } catch (error: any) {
     return res.status(400).json({ success: false, message: error.message });
   }
 };
 
-export const refreshingToken = async (req, res) => {
+export const refreshingToken = async (req: Request, res: Response) => {
   const response = {success: true, access: '', refresh: '',};
    try {
-    const {userId, refresh_token, phone, role} = req.body; 
+    const {userId, refresh_token, phone, role}: {userId: string, refresh_token: string, phone: string, role: UserRole} = req.body; 
 
    //hash the refresh token
    const hashedRefreshToken = hashToken(refresh_token)
    const {success, error, data} = await getRefreshToken(userId, hashedRefreshToken)
    if(!success) throw new Error(error)
     const now = new Date()
-    const expired = now > data.expiresAt 
+    const expired = now > data!.expiresAt 
     if(expired) throw new Error("Refresh token is expired");
-    if(data.revoked) throw new Error("Refresh token is revoked");
+    if(data!.revoked) throw new Error("Refresh token is revoked");
 
     //revoke the old token 
-    const { success: revoke_success, error: revoke_error } = await revokeToken(data.refreshToken);
+    const { success: revoke_success, error: revoke_error } = await revokeToken(data!.refreshToken);
     if(!revoke_success) throw new Error(revoke_error)
 
 
     const {_error: someError, _data, _success: someSuccess} = await generateTokens(userId , phone, role)
-      if(!someSuccess) throw new Error(someError);
-      response.access = _data.access_token;
-      response.refresh = _data.refresh_token;
+      if(!someSuccess) throw new Error(someError!);
+      response.access = _data!.access_token;
+      response.refresh = _data!.refresh_token;
 
       return res.status(200).json(response);
     //
-   } catch (error) {
+   } catch (error: any) {
       console.log("error: ", error)
       return res.status(400).json({ success: false, error: error.message });
    }
