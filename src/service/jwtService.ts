@@ -1,6 +1,7 @@
 import jwtPkg from 'jsonwebtoken'
 import { generateRefreshToken } from '../utils/cryptoHelper.js';
 import { insertRefreshToken } from './dbService.js';
+import { refreshTokenDetailType } from '../types/dbServiceTypes.js';
 
 const {sign} = jwtPkg;
 
@@ -18,7 +19,7 @@ export async function generateTokens(userId: string, phone: string, role: string
     const {actulToken, hashedToken} = generateRefreshToken();
 
     const refresh_expiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const refreshTokenDetail = {userId: userId, refreshToken: hashedToken, refreshExpiry: refresh_expiry}
+    const refreshTokenDetail: refreshTokenDetailType = {userId: userId, refreshToken: hashedToken, expiresAt: refresh_expiry}
     const response = await insertRefreshToken(refreshTokenDetail); 
 
     if(!response.success) throw new Error(response.error);

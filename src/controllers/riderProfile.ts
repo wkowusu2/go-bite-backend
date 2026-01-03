@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
 import { createRiderProfiles, findRiderProfileWithId, updateRidersAvatar, updateRidersOnlineStatus, updateRidersProfile, updateRidersPushToken } from "../service/dbService.js";
 import { JwtPayloadType } from "../types/jwtType.js";
+import { ProfileType } from "../types/dbServiceTypes.js";
 
 export async function createRiderProfile(req: Request, res: Response<{}, {user: JwtPayloadType}>) {
     const {fullName, email} = req.body; 
     const {sub} = res.locals.user
-    const profileDetails = {userId: sub, fullName: fullName, email: email};
+    const profileDetails: ProfileType = {userId: sub!, fullName: fullName, email: email};
     
     try {
         //check to see if there's a profile with the id
-        const {success, error, data} = await findRiderProfileWithId(sub);
+        const {success, error, data} = await findRiderProfileWithId(sub!);
         //a network error occurred or something similar to that 
         if(error && error != "Profile does not exit") throw new Error(error);
         if(success) throw new Error("Profile already exists, consider updating"); 
@@ -31,7 +32,7 @@ export async function getRiderProfile(req: Request, res: Response<{}, {user: Jwt
     const {sub} = res.locals.user;
     try {
         //check if profile exits 
-        const {error, success, data} = await findRiderProfileWithId(sub);
+        const {error, success, data} = await findRiderProfileWithId(sub!);
         if(!success) throw new Error(error); 
         return res.status(200).json({success: true, error: null, data: data});
 
@@ -47,7 +48,7 @@ export async function updateRiderProfile(req: Request, res: Response<{}, {user: 
         const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
-        const profileDetails = {fullName: fullName, email: email, userId: sub}
+        const profileDetails: ProfileType = {fullName: fullName, email: email, userId: sub!}
 
         const {success, error, data} = await updateRidersProfile(profileDetails);
         if(!success) throw new Error(error);
@@ -65,7 +66,7 @@ export async function updateRiderAvatar(req: Request, res: Response<{}, {user: J
         const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
-        const profileDetails = {avatarUrl: avatarUrl, userId: sub}
+        const profileDetails: ProfileType = {avatarUrl: avatarUrl, userId: sub!}
 
         const {success, error, data} = await updateRidersAvatar(profileDetails);
         if(!success) throw new Error(error);
@@ -83,7 +84,7 @@ export async function updateRiderPushToken(req: Request, res: Response<{}, {user
         const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
-        const profileDetails = {pushToken: pushToken, userId: sub}
+        const profileDetails: ProfileType = {pushToken: pushToken, userId: sub!}
 
         const {success, error, data} = await updateRidersPushToken(profileDetails);
         if(!success) throw new Error(error);
@@ -101,7 +102,7 @@ export async function updateRiderOnlineStatus(req: Request, res: Response<{}, {u
         const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
-        const profileDetails = {onlineStatus: onlineStatus, userId: sub}
+        const profileDetails: {onlineStatus: boolean, userId: string } = {onlineStatus: onlineStatus, userId: sub!}
 
         const {success, error, data} = await updateRidersOnlineStatus(profileDetails);
         if(!success) throw new Error(error);

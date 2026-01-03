@@ -1,12 +1,16 @@
 import { Request, Response } from "express";
 import { createCustomerProfile, createIsGuest, findCustomerProfileWithId, getUserIsGuest, updateCustomerProfile, updateCustomersAvatar, updateCustomersPushToken, updateIsGuest } from "../service/dbService.js";
 import { JwtPayloadType } from "../types/jwtType.js";
+import { CreateUserType, ProfileType } from "../types/dbServiceTypes.js";
 
 export async function createProfile(req: Request, res: Response<{}, {user: JwtPayloadType}>) {
     const {fullName, email} = req.body; 
     console.log("res.locals.user is :", res.locals.user)
     const {sub} = res.locals.user;
-    const profileDetails = {userId: sub, fullName: fullName, email: email};
+    if(!sub){
+        throw new Error("No userId found")
+    }
+    const profileDetails: CreateUserType = {userId: sub, fullName: fullName, email: email};
     
     try {
         //check to see if there's a profile with the id
@@ -30,6 +34,9 @@ export async function createProfile(req: Request, res: Response<{}, {user: JwtPa
 export async function getProfile(req: Request,res: Response<{}, {user: JwtPayloadType}>) {
     console.log("req,user: ", res.locals.user)
     const {sub} = res.locals.user;
+    if(!sub){
+        throw new Error("No userId found")
+    }
     try {
         //check if profile exits 
         const {error, success, data} = await findCustomerProfileWithId(sub);
@@ -48,7 +55,7 @@ export async function updateProfile(req: Request,res: Response<{}, {user: JwtPay
         const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
-        const profileDetails = {fullName: fullName, email: email, userId: sub}
+        const profileDetails: ProfileType = {fullName: fullName, email: email, userId: sub!}
 
         const {success, error, data} = await updateCustomerProfile(profileDetails);
         if(!success) throw new Error(error);
@@ -66,7 +73,7 @@ export async function updateCutomerAvatar(req: Request,   res: Response<{}, {use
         const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
-        const profileDetails = {avatarUrl: avatarUrl, userId: sub}
+        const profileDetails: ProfileType = {avatarUrl: avatarUrl, userId: sub!}
 
         const {success, error, data} = await updateCustomersAvatar(profileDetails);
         if(!success) throw new Error(error);
@@ -84,7 +91,7 @@ export async function updateCustomerPushToken(req: Request,   res: Response<{}, 
         const {sub} = res.locals.user;
         console.log("userId: ", sub)
 
-        const profileDetails = {pushToken: pushToken, userId: sub}
+        const profileDetails: ProfileType = {pushToken: pushToken, userId: sub!}
 
         const {success, error, data} = await updateCustomersPushToken(profileDetails);
         if(!success) throw new Error(error);
@@ -100,6 +107,10 @@ export async function creatingIsGuest(req: Request,   res: Response<{}, {user: J
     try {
         const {status} = req.body; 
         const {sub} = res.locals.user;
+
+        if(!sub){
+        throw new Error("No userId found")
+    }
 
         const {data, error, success} = await createIsGuest(sub, status); 
         console.log("Data from creating user is guest ", data)
@@ -120,6 +131,10 @@ export async function updatingIsGuest(req: Request,   res: Response<{}, {user: J
         const {status} = req.body; 
         const {sub} = res.locals.user;
 
+        if(!sub){
+        throw new Error("No userId found")
+    }
+
         const {data, error, success} = await updateIsGuest(sub, status); 
         console.log("Data from update is guest ", data)
         if(!success) throw new Error(error);
@@ -137,6 +152,10 @@ export async function updatingIsGuest(req: Request,   res: Response<{}, {user: J
 export async function gettingIsguest(req: Request,res: Response<{}, {user: JwtPayloadType}>) {
     try {
         const {sub} = res.locals.user;
+
+        if(!sub){
+        throw new Error("No userId found")
+    }
 
         const {data, error, success} = await getUserIsGuest(sub);
         if(!success) throw new Error(error);
