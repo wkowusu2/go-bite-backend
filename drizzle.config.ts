@@ -5,8 +5,8 @@ config();
 export default defineConfig({
     dialect: 'postgresql',
     out: './src/migration',
-    schema:'./src/schema',
+    schema:'./src/schema/index.ts',
     dbCredentials:{
-        url: process.env.DATABASE_URL
+        url: process.env.DATABASE_URL!
     }
 })
