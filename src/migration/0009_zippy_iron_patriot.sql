@@ -42,7 +42,7 @@ CREATE TABLE "orders" (
 	"restaurantLocationId" uuid NOT NULL,
 	"status" text NOT NULL,
 	"delivery_city" text NOT NULL,
-	"delivery_location" "geography(Point, 4326)" NOT NULL,
+	"delivery_location" geography(Point, 4326) NOT NULL,
 	"subtotal" numeric(10, 2) NOT NULL,
 	"delivery_fee" numeric(10, 2),
 	"total" numeric(10, 2) NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE "orders" (
 CREATE TABLE "restaurant_location" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"restaurant_id" uuid NOT NULL,
-	"location" "geography(Point, 4326)" NOT NULL,
+	"location" geography(Point, 4326) NOT NULL,
 	"city" text
 );
 --> statement-breakpoint
