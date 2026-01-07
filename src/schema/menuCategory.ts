@@ -4,7 +4,7 @@ import { restaurants } from "./restaurant.js";
 export const menuCategories = pgTable('menu_categories', {
     id: uuid().defaultRandom().primaryKey(),
     name: text().notNull(),
-    restaurantId: uuid().notNull().references(() => restaurants.id,{
+    restaurantId: uuid('restaurant_id').notNull().references(() => restaurants.id,{
         onDelete: "cascade",
         onUpdate: "cascade"
     }),

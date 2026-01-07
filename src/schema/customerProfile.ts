@@ -9,7 +9,7 @@ export const customerProfileTable = pgTable('customer_profile', {
     pushToken: text('push_token'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
-    userId: uuid().notNull().references(() => users.id, {
+    userId: uuid('user_id').notNull().references(() => users.id, {
         onDelete: 'cascade',
         onUpdate: 'cascade'
     }),

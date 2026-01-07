@@ -6,11 +6,11 @@ import { geographyPoint } from "./customTypes.js";
 
 export const orders = pgTable('orders', {
     id: uuid().defaultRandom().primaryKey(),
-    customerId: uuid().notNull().references(() => users.id),
-    restaurantId: uuid().notNull().references(() => restaurants.id, {
+    customerId: uuid('customer_id').notNull().references(() => users.id),
+    restaurantId: uuid('restaurant_id').notNull().references(() => restaurants.id, {
         onDelete: 'restrict'
     }),
-    restaurantLocationId: uuid().notNull().references(() => restaurantLocation.id, {
+    restaurantLocationId: uuid('restaurant_location_id').notNull().references(() => restaurantLocation.id, {
         onDelete: 'restrict'
     }), 
     status: text().notNull(), 

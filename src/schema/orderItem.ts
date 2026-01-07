@@ -4,10 +4,10 @@ import { menuItems } from "./menuItem.js";
 
 export const orderItems = pgTable("order_items", {
     id: uuid().defaultRandom().primaryKey(), 
-    orderId: uuid().notNull().references(() => orders.id, {
+    orderId: uuid('user_id').notNull().references(() => orders.id, {
         onDelete: 'restrict'
     }), 
-    menuItemId: uuid().notNull().references(() => menuItems.id, {
+    menuItemId: uuid('menuItem_id').notNull().references(() => menuItems.id, {
         onDelete: 'restrict'
     }),
     nameSnaphot: text("name_snaphot"),

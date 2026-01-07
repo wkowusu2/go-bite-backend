@@ -71,6 +71,13 @@
       "when": 1767793075067,
       "tag": "0009_zippy_iron_patriot",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1767808895655,
+      "tag": "0010_lovely_scarecrow",
+      "breakpoints": true
     }
   ]
 }

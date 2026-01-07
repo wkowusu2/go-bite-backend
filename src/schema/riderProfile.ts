@@ -11,7 +11,7 @@ export const riderProfiles = pgTable('rider_profiles', {
     onlineStatus: boolean('online_status').default(false),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
-    userId: uuid().notNull().references(() => users.id, {
+    userId: uuid('user_id').notNull().references(() => users.id, {
             onDelete: 'cascade',
             onUpdate: 'cascade'
         }),
