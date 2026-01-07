@@ -1,4 +1,5 @@
 export { roleEnum } from "./enums.js";
+export { geographyPoint } from "./customTypes.js";
 export { users } from "./users.js";
 export { customerProfileTable } from "./customerProfile.js";
 export { riderProfiles } from "./riderProfile.js";

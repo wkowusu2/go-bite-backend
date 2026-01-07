@@ -1,11 +1,6 @@
-import { customType, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid } from "drizzle-orm/pg-core";
 import { restaurants } from "./restaurant.js";
-
-const geographyPoint = customType<{ data: string }>({
-  dataType() {
-    return "geography(Point, 4326)";
-  },
-});
+import { geographyPoint } from "./customTypes.js";
 
 export const restaurantLocation = pgTable('restaurant_location', {
     id: uuid().defaultRandom().primaryKey(),
