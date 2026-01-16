@@ -1,4 +1,4 @@
-import { boolean, decimal, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, decimal, integer, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const restaurants = pgTable("restaurants", {
     id: uuid().defaultRandom().primaryKey(),
@@ -13,5 +13,7 @@ export const restaurants = pgTable("restaurants", {
     password: text(),
     image: text(),
     isActive: boolean("is_active").default(false),
+    zoneX: integer('zone_x'), 
+    zoneY: integer('zone_x'),
     createdAt: timestamp("created_at").defaultNow(),
 })

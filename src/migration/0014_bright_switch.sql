@@ -1,0 +1,1 @@
+-- ALTER TABLE "restaurants" ALTER COLUMN "zone_x" DROP NOT NULL;

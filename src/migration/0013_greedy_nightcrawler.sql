@@ -1,0 +1,1 @@
+ALTER TABLE "restaurants" ADD COLUMN "zone_x" integer ;
