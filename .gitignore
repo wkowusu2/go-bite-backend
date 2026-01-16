@@ -74,3 +74,7 @@ Desktop.ini
 thingsToDo.txt
 api-documentation.yaml
 seed.ts
+
+# Drizzle / migration generated files
+src/migration/relations.ts
+src/migration/schema.ts
